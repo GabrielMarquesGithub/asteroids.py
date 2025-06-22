@@ -41,6 +41,11 @@ def main():
 
         pygame.display.flip()  # Atualiza a tela
 
+        for asteroid in asteroids:
+            if player.check_collision(asteroid):
+                print("Game over!")
+                return
+
         # Isso pausará o loop do jogo até que 1/60 de segundo tenha passado.
         dt = clock.tick(60) / 1000
 
