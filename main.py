@@ -52,7 +52,7 @@ def main():
 
             for shot in shots:
                 if shot.check_collision(asteroid):
-                    asteroid.kill()  # Remove o asteroide se colidir com o tiro
+                    asteroid.split()  # Remove o asteroide se colidir com o tiro
                     shot.kill()  # Remove o tiro após a colisão
 
         # Isso pausará o loop do jogo até que 1/60 de segundo tenha passado.
