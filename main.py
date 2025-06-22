@@ -2,8 +2,9 @@ import pygame
 
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import GAME_FPS, SCREEN_WIDTH, SCREEN_HEIGHT
 from player import Player
+from shot import Shot
 
 
 def main():
@@ -17,6 +18,7 @@ def main():
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
 
     Asteroid.containers = (updatable, drawable, asteroids)
     AsteroidField.containers = updatable
@@ -24,6 +26,8 @@ def main():
 
     Player.containers = (updatable, drawable)
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+
+    Shot.containers = (updatable, drawable, shots)
 
     while True:
         # Verifica eventos
@@ -46,8 +50,13 @@ def main():
                 print("Game over!")
                 return
 
+            for shot in shots:
+                if shot.check_collision(asteroid):
+                    asteroid.kill()  # Remove o asteroide se colidir com o tiro
+                    shot.kill()  # Remove o tiro após a colisão
+
         # Isso pausará o loop do jogo até que 1/60 de segundo tenha passado.
-        dt = clock.tick(60) / 1000
+        dt = clock.tick(GAME_FPS) / 1000
 
 
 if __name__ == "__main__":

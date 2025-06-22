@@ -1,7 +1,16 @@
 import pygame
 
-from constants import PLAYER_RADIUS, PLAYER_SPEED, PLAYER_TURN_SPEED
+from constants import (
+    PLAYER_RADIUS,
+    PLAYER_SHOOT_COOLDOWN,
+    PLAYER_SHOT_SPEED,
+    PLAYER_SPEED,
+    PLAYER_TURN_SPEED,
+    SHOT_LIFETIME,
+    SHOT_RADIUS,
+)
 from circleshape import CircleShape
+from shot import Shot
 
 
 class Player(CircleShape):
@@ -10,11 +19,15 @@ class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
 
+        self.shot_timer = 0
         self.rotation = 0
 
+    def get_forward_vector(self):
+        return pygame.Vector2(0, 1).rotate(self.rotation)
+
     def triangle(self):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
+        forward = self.get_forward_vector()
+        right = self.get_forward_vector().rotate(90) * self.radius / 1.5
         a = self.position + forward * self.radius
         b = self.position - forward * self.radius - right
         c = self.position - forward * self.radius + right
@@ -27,6 +40,8 @@ class Player(CircleShape):
         self.rotation += PLAYER_TURN_SPEED * dt
 
     def update(self, dt):
+        self.shot_timer -= dt
+
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
@@ -39,6 +54,22 @@ class Player(CircleShape):
         if keys[pygame.K_s]:
             self.move(-dt)  # Move para trás
 
+        if keys[pygame.K_SPACE]:
+            self.shot()  # Dispara
+
     def move(self, dt):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        forward = self.get_forward_vector()
         self.position += forward * PLAYER_SPEED * dt
+
+    def shot(self):
+        if self.shot_timer > 0:
+            return  # Não dispara se o tempo de recarga não tiver acabado
+
+        self.shot_timer = PLAYER_SHOOT_COOLDOWN
+
+        forward = self.get_forward_vector()
+
+        shot_position = self.position + forward * (self.radius + SHOT_RADIUS + 5)
+
+        shot = Shot(shot_position.x, shot_position.y, SHOT_LIFETIME)
+        shot.velocity = forward * PLAYER_SHOT_SPEED
